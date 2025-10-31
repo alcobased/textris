@@ -1,0 +1,16 @@
+# IDE-specific files
+.vscode/
+.idx/
+
+# Generated state files
+polyomino-state.json
+
+# Project documentation and AI-related files
+blueprint.md
+GEMINI.md
+
+# Node dependencies
+node_modules/
+
+# Log files
+*.log

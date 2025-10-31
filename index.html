@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polyomino Creator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <h1>Polyomino Creator</h1>
+            <textarea id="polyomino-input" rows="5" placeholder="Enter polyomino pattern..."></textarea>
+            <div class="buttons">
+                <button id="confirm-btn">Confirm</button>
+                <button id="confirm-template-btn">Confirm Template</button>
+                <button id="clear-shapes-btn">Clear Shapes</button>
+                <button id="clear-overlay-btn">Clear Overlay</button>
+                <button id="delete-btn">Delete</button>
+            </div>
+            <div class="file-buttons">
+                <button id="save-local-btn">Save to Local</button>
+                <button id="load-local-btn">Load from Local</button>
+                <button id="save-file-btn">Save to File</button>
+                <button id="load-file-btn">Load from File</button>
+                <input type="file" id="file-input" accept=".json" style="display: none;">
+            </div>
+        </div>
+        <div id="grid-container"></div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

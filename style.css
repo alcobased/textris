@@ -1,0 +1,153 @@
+:root {
+    --bg-color: #1a1a1a;
+    --grid-bg-color: #2a2a2a;
+    --cell-color: #444;
+    --cell-hover-color: #666;
+    --text-color: #eee;
+    --accent-color: #006eff;
+    --active-polyomino-color: #ffaa00;
+    --template-overlay-color: rgba(200, 200, 200, 0.35);
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.controls {
+    width: 250px;
+    padding: 20px;
+    background-color: var(--grid-bg-color);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+h1 {
+    margin: 0;
+    text-align: center;
+    color: var(--accent-color);
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+
+textarea {
+    background-color: var(--cell-color);
+    border: 1px solid var(--accent-color);
+    color: var(--text-color);
+    padding: 10px;
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.buttons,
+.file-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+button {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    font-size: 1em;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0088cc;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+#grid-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(40, 1fr);
+    grid-template-rows: repeat(30, 1fr);
+    gap: 1px;
+    background-color: var(--grid-bg-color);
+    padding: 10px;
+    overflow: auto;
+    aspect-ratio: 40 / 30;
+    max-height: 100vh;
+    max-width: calc(100vw - 290px);
+}
+
+.cell {
+    background-color: var(--cell-color);
+    border: 1px solid #333;
+    cursor: pointer;
+    transition: background-color 0.2s, filter 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.cell:hover {
+    background-color: var(--cell-hover-color);
+}
+
+.cell.active {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+.cell.polyomino-active {
+    background-color: var(--active-polyomino-color);
+}
+
+.cell.template-overlay:not(.active) {
+    background-color: var(--template-overlay-color);
+}
+
+.cell.active.template-overlay,
+.cell.polyomino-active.template-overlay {
+    filter: brightness(1.4);
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .controls {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        height: auto;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    #grid-container {
+        max-width: 100vw;
+        width: 100%;
+        height: auto;
+        max-height: calc(100vh - 250px);
+    }
+}
