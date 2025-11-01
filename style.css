@@ -7,6 +7,7 @@
     --accent-color: #bb9f53;
     --accent-color-active: #ffbb00;
     --template-overlay-color: rgba(200, 200, 200, 0.35);
+    --preview-overlay-color: rgba(0, 100, 255, 0.35);
 }
 
 body,
@@ -123,6 +124,14 @@ button:active {
 
 .cell.template-overlay:not(.active) {
     background-color: var(--template-overlay-color);
+}
+
+.cell.preview-overlay {
+    background-color: var(--preview-overlay-color);
+}
+
+.cell.preview-overlay.template-overlay {
+    background-color: color-mix(in srgb, var(--template-overlay-color) 50%, var(--preview-overlay-color) 50%);
 }
 
 .cell.active.template-overlay,

@@ -19,7 +19,9 @@ let polyominoes = [];
 let nextPolyominoId = 0;
 let activePolyominoId = null;
 let activePolyominoHandle = null; // To store the click offset {row, col}
+let activePolyominoOriginalPosition = null;
 let templateOverlay = [];
+let previewOverlay = [];
 
 function createGrid() {
     gridContainer.innerHTML = '';
@@ -28,7 +30,9 @@ function createGrid() {
     nextPolyominoId = 0;
     activePolyominoId = null;
     activePolyominoHandle = null;
+    activePolyominoOriginalPosition = null;
     clearOverlay();
+    clearPreview();
     for (let i = 0; i < GRID_HEIGHT; i++) {
         const row = [];
         for (let j = 0; j < GRID_WIDTH; j++) {
@@ -73,6 +77,49 @@ function handleCellClick(e) {
     }
 }
 
+function handleCellMouseMove(e) {
+    if (e.target.classList.contains('cell') && activePolyominoId !== null) {
+        const row = parseInt(e.target.dataset.row);
+        const col = parseInt(e.target.dataset.col);
+        const polyomino = polyominoes.find(p => p.id === activePolyominoId);
+        if (!polyomino || !activePolyominoHandle) return;
+
+        const newRow = row - activePolyominoHandle.row;
+        const newCol = col - activePolyominoHandle.col;
+
+        clearPreview();
+        drawPreview(newRow, newCol, polyomino.pattern);
+    }
+}
+
+function handleRightClick(e) {
+    e.preventDefault();
+    if (activePolyominoId !== null) {
+        const polyomino = polyominoes.find(p => p.id === activePolyominoId);
+        if (polyomino && activePolyominoOriginalPosition) {
+            // Clear the current position from the grid array
+            for (let i = 0; i < polyomino.pattern.length; i++) {
+                for (let j = 0; j < polyomino.pattern[i].length; j++) {
+                    if (polyomino.pattern[i][j] !== '.') {
+                        const oldGridRow = polyomino.row + i;
+                        const oldGridCol = polyomino.col + j;
+                        if (oldGridRow >= 0 && oldGridRow < GRID_HEIGHT && oldGridCol >= 0 && oldGridCol < GRID_WIDTH) {
+                            grid[oldGridRow][oldGridCol] = null;
+                        }
+                    }
+                }
+            }
+
+            // Restore original position
+            polyomino.row = activePolyominoOriginalPosition.row;
+            polyomino.col = activePolyominoOriginalPosition.col;
+            
+            redrawGrid();
+            setActivePolyomino(null);
+        }
+    }
+}
+
 function moveActivePolyomino(targetRow, targetCol) {
     const polyomino = polyominoes.find(p => p.id === activePolyominoId);
     if (!polyomino || !activePolyominoHandle) return;
@@ -93,9 +140,6 @@ function moveActivePolyomino(targetRow, targetCol) {
                 const oldGridRow = polyomino.row + i;
                 const oldGridCol = polyomino.col + j;
                 grid[oldGridRow][oldGridCol] = null;
-                const cell = gridContainer.querySelector(`[data-row="${oldGridRow}"][data-col="${oldGridCol}"]`);
-                cell.textContent = '';
-                cell.classList.remove('active', 'polyomino-active');
             }
         }
     }
@@ -104,20 +148,9 @@ function moveActivePolyomino(targetRow, targetCol) {
     polyomino.row = newRow;
     polyomino.col = newCol;
 
-    // Draw in the new position
-    for (let i = 0; i < polyomino.pattern.length; i++) {
-        for (let j = 0; j < polyomino.pattern[i].length; j++) {
-            if (polyomino.pattern[i][j] !== '.') {
-                const newGridRow = polyomino.row + i;
-                const newGridCol = polyomino.col + j;
-                grid[newGridRow][newGridCol] = polyomino.id;
-                const cell = gridContainer.querySelector(`[data-row="${newGridRow}"][data-col="${newGridCol}"]`);
-                cell.textContent = polyomino.pattern[i][j];
-                cell.classList.add('active');
-            }
-        }
-    }
-
+    // Redraw the entire grid to reflect the change
+    redrawGrid();
+    
     // Deactivate the polyomino after moving
     setActivePolyomino(null);
 }
@@ -133,27 +166,31 @@ function setActivePolyomino(polyominoId, handle = null) {
                         const gridRow = oldActivePolyomino.row + i;
                         const gridCol = oldActivePolyomino.col + j;
                         const cell = gridContainer.querySelector(`[data-row="${gridRow}"][data-col="${gridCol}"]`);
-                        cell.classList.remove('polyomino-active');
+                        if(cell) cell.classList.remove('polyomino-active');
                     }
                 }
             }
         }
     }
 
+    clearPreview();
+
     activePolyominoId = polyominoId;
     activePolyominoHandle = handle;
+    activePolyominoOriginalPosition = null;
 
     // Activate new polyomino
     if (activePolyominoId !== null) {
         const newActivePolyomino = polyominoes.find(p => p.id === activePolyominoId);
         if (newActivePolyomino) {
+            activePolyominoOriginalPosition = { row: newActivePolyomino.row, col: newActivePolyomino.col };
             for (let i = 0; i < newActivePolyomino.pattern.length; i++) {
                 for (let j = 0; j < newActivePolyomino.pattern[i].length; j++) {
                     if (newActivePolyomino.pattern[i][j] !== '.') {
                         const gridRow = newActivePolyomino.row + i;
                         const gridCol = newActivePolyomino.col + j;
                         const cell = gridContainer.querySelector(`[data-row="${gridRow}"][data-col="${gridCol}"]`);
-                        cell.classList.add('polyomino-active');
+                        if(cell) cell.classList.add('polyomino-active');
                     }
                 }
             }
@@ -167,6 +204,8 @@ function clearShapes() {
     nextPolyominoId = 0;
     activePolyominoId = null;
     activePolyominoHandle = null;
+    activePolyominoOriginalPosition = null;
+    clearPreview();
     redrawGrid();
 }
 
@@ -235,6 +274,35 @@ function clearOverlay() {
     templateOverlay = [];
 }
 
+function drawPreview(startRow, startCol, pattern) {
+    for (let i = 0; i < pattern.length; i++) {
+        for (let j = 0; j < pattern[i].length; j++) {
+            if (pattern[i][j] !== '.') {
+                const gridRow = startRow + i;
+                const gridCol = startCol + j;
+
+                if (gridRow >= 0 && gridRow < GRID_HEIGHT && gridCol >= 0 && gridCol < GRID_WIDTH) {
+                    const cell = gridContainer.querySelector(`[data-row="${gridRow}"][data-col="${gridCol}"]`);
+                    if (cell) {
+                        cell.classList.add('preview-overlay');
+                        previewOverlay.push({row: gridRow, col: gridCol});
+                    }
+                }
+            }
+        }
+    }
+}
+
+function clearPreview() {
+    previewOverlay.forEach(pos => {
+        const cell = gridContainer.querySelector(`[data-row="${pos.row}"][data-col="${pos.col}"]`);
+        if (cell) {
+            cell.classList.remove('preview-overlay');
+        }
+    });
+    previewOverlay = [];
+}
+
 function drawPolyomino(polyomino) {
     for (let i = 0; i < polyomino.pattern.length; i++) {
         for (let j = 0; j < polyomino.pattern[i].length; j++) {
@@ -269,9 +337,6 @@ function deleteActivePolyomino() {
                     const gridRow = polyomino.row + i;
                     const gridCol = polyomino.col + j;
                     grid[gridRow][gridCol] = null;
-                    const cell = gridContainer.querySelector(`[data-row="${gridRow}"][data-col="${gridCol}"]`);
-                    cell.textContent = '';
-                    cell.classList.remove('active', 'polyomino-active');
                 }
             }
         }
@@ -279,6 +344,7 @@ function deleteActivePolyomino() {
         // Remove from state
         polyominoes = polyominoes.filter(p => p.id !== activePolyominoId);
         setActivePolyomino(null);
+        redrawGrid();
     }
 }
 
@@ -389,12 +455,24 @@ function redrawGrid() {
     const cells = gridContainer.querySelectorAll('.cell');
     cells.forEach(cell => {
         cell.textContent = '';
-        cell.classList.remove('active', 'polyomino-active', 'template-overlay');
+        cell.classList.remove('active', 'polyomino-active', 'template-overlay', 'preview-overlay');
     });
 
     // Redraw polyominoes
     polyominoes.forEach(polyomino => {
-        drawPolyomino(polyomino);
+        for (let i = 0; i < polyomino.pattern.length; i++) {
+            for (let j = 0; j < polyomino.pattern[i].length; j++) {
+                const char = polyomino.pattern[i][j];
+                if (char !== '.') {
+                    const gridRow = polyomino.row + i;
+                    const gridCol = polyomino.col + j;
+                    grid[gridRow][gridCol] = polyomino.id;
+                    const cell = gridContainer.querySelector(`[data-row="${gridRow}"][data-col="${gridCol}"]`);
+                    cell.textContent = char;
+                    cell.classList.add('active');
+                }
+            }
+        }
     });
 
     // Redraw template
@@ -415,6 +493,8 @@ polyominoInput.addEventListener('input', (e) => {
 });
 
 gridContainer.addEventListener('click', handleCellClick);
+gridContainer.addEventListener('mousemove', handleCellMouseMove);
+gridContainer.addEventListener('contextmenu', handleRightClick);
 clearShapesBtn.addEventListener('click', clearShapes);
 clearOverlayBtn.addEventListener('click', clearOverlay);
 confirmBtn.addEventListener('click', parseAndDraw);
