@@ -4,8 +4,8 @@
     --cell-color: #444;
     --cell-hover-color: #666;
     --text-color: #eee;
-    --accent-color: #006eff;
-    --active-polyomino-color: #ffaa00;
+    --accent-color: #bb9f53;
+    --accent-color-active: #ffbb00;
     --template-overlay-color: rgba(200, 200, 200, 0.35);
 }
 
@@ -75,7 +75,7 @@ button {
 }
 
 button:hover {
-    background-color: #0088cc;
+    background-color: var(--accent-color-active);
 }
 
 button:active {
@@ -98,7 +98,7 @@ button:active {
 
 .cell {
     background-color: var(--cell-color);
-    border: 1px solid #333;
+    /* border: 1px solid #333; */
     cursor: pointer;
     transition: background-color 0.2s, filter 0.2s;
     display: flex;
@@ -118,7 +118,7 @@ button:active {
 }
 
 .cell.polyomino-active {
-    background-color: var(--active-polyomino-color);
+    background-color: var(--accent-color-active);
 }
 
 .cell.template-overlay:not(.active) {
