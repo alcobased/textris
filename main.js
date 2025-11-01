@@ -42,6 +42,7 @@ function createGrid() {
             cell.dataset.col = j;
             gridContainer.appendChild(cell);
             row.push(null);
+            cell.addEventListener('mouseover', handleCellMouseOver);
         }
         grid.push(row);
     }
@@ -77,7 +78,7 @@ function handleCellClick(e) {
     }
 }
 
-function handleCellMouseMove(e) {
+function handleCellMouseOver(e) {
     if (e.target.classList.contains('cell') && activePolyominoId !== null) {
         const row = parseInt(e.target.dataset.row);
         const col = parseInt(e.target.dataset.col);
@@ -493,7 +494,6 @@ polyominoInput.addEventListener('input', (e) => {
 });
 
 gridContainer.addEventListener('click', handleCellClick);
-gridContainer.addEventListener('mousemove', handleCellMouseMove);
 gridContainer.addEventListener('contextmenu', handleRightClick);
 clearShapesBtn.addEventListener('click', clearShapes);
 clearOverlayBtn.addEventListener('click', clearOverlay);
